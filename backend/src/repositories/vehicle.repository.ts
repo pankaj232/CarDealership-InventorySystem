@@ -109,6 +109,23 @@ export class MongooseVehicleRepository implements IVehicleRepository {
     return vehicle ? toPersistedVehicle(vehicle) : null;
   }
 
+  async increaseQuantity(
+    id: string,
+    amount: number
+  ): Promise<PersistedVehicle | null> {
+    if (!isValidObjectId(id)) {
+      return null;
+    }
+
+    const vehicle = await Vehicle.findByIdAndUpdate(
+      id,
+      { $inc: { quantity: amount } },
+      { returnDocument: 'after' }
+    );
+
+    return vehicle ? toPersistedVehicle(vehicle) : null;
+  }
+
   async delete(id: string): Promise<boolean> {
     if (!isValidObjectId(id)) {
       return false;

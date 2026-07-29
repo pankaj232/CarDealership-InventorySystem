@@ -4,6 +4,7 @@ import { AddVehicleService } from './add-vehicle.service';
 import { DeleteVehicleService } from './delete-vehicle.service';
 import { ListVehiclesService } from './list-vehicles.service';
 import { PurchaseService } from './purchase.service';
+import { RestockService } from './restock.service';
 import { SearchVehiclesService } from './search-vehicles.service';
 import { UpdateVehicleService } from './update-vehicle.service';
 
@@ -30,3 +31,6 @@ export const createDeleteVehicleService = (): DeleteVehicleService =>
 
 export const createPurchaseService = (): PurchaseService =>
   new PurchaseService(new MongooseVehicleRepository());
+
+export const createRestockService = (): RestockService =>
+  new RestockService(new MongooseVehicleRepository());

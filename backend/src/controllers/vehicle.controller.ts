@@ -4,6 +4,7 @@ import { AddVehicleService } from '../services/add-vehicle.service';
 import { DeleteVehicleService } from '../services/delete-vehicle.service';
 import { ListVehiclesService } from '../services/list-vehicles.service';
 import { PurchaseService } from '../services/purchase.service';
+import { RestockService } from '../services/restock.service';
 import { SearchVehiclesService } from '../services/search-vehicles.service';
 import { UpdateVehicleService } from '../services/update-vehicle.service';
 
@@ -14,7 +15,8 @@ export class VehicleController {
     private readonly searchVehiclesService: SearchVehiclesService,
     private readonly updateVehicleService: UpdateVehicleService,
     private readonly deleteVehicleService: DeleteVehicleService,
-    private readonly purchaseService: PurchaseService
+    private readonly purchaseService: PurchaseService,
+    private readonly restockService: RestockService
   ) {}
 
   addVehicle = async (
@@ -130,6 +132,22 @@ export class VehicleController {
     try {
       const vehicle = await this.purchaseService.purchase(
         req.params.id as string
+      );
+      res.status(200).json(vehicle);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  restockVehicle = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    try {
+      const vehicle = await this.restockService.restock(
+        req.params.id as string,
+        req.body?.amount
       );
       res.status(200).json(vehicle);
     } catch (error) {

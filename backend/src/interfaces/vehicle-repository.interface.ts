@@ -39,5 +39,9 @@ export interface IVehicleRepository {
   search(criteria: VehicleSearchCriteria): Promise<PersistedVehicle[]>;
   update(id: string, data: CreateVehicleData): Promise<PersistedVehicle | null>;
   decreaseQuantity(id: string): Promise<PersistedVehicle | null>;
+  increaseQuantity(
+    id: string,
+    amount: number
+  ): Promise<PersistedVehicle | null>;
   delete(id: string): Promise<boolean>;
 }
