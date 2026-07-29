@@ -1,7 +1,9 @@
 import { NextFunction, Request, Response } from 'express';
 import {
   DuplicateEmailError,
+  ForbiddenError,
   InvalidCredentialsError,
+  NotFoundError,
   UnauthorizedError,
   ValidationError,
 } from '../utils/errors';
@@ -36,6 +38,20 @@ export const domainErrorHandler = (
 
   if (error instanceof UnauthorizedError) {
     res.status(401).json({
+      message: error.message,
+    });
+    return;
+  }
+
+  if (error instanceof ForbiddenError) {
+    res.status(403).json({
+      message: error.message,
+    });
+    return;
+  }
+
+  if (error instanceof NotFoundError) {
+    res.status(404).json({
       message: error.message,
     });
     return;
