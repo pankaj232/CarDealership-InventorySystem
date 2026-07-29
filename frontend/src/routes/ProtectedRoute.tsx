@@ -12,6 +12,12 @@ export const ProtectedRoute = () => {
   return <Outlet />;
 };
 
+export const AdminRoute = () => {
+  const { isAdmin } = useAuth();
+
+  return isAdmin ? <Outlet /> : <Navigate to="/dashboard" replace />;
+};
+
 export const PublicOnlyRoute = () => {
   const { isAuthenticated } = useAuth();
 

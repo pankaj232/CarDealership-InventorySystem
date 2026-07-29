@@ -1,47 +1,84 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { vehiclesApi } from '@/api/vehicles';
 import { AppShell } from '@/components/layout/AppShell';
 import { VehicleCard } from '@/components/vehicles/VehicleCard';
-import type { Vehicle } from '@/types';
+import { VehicleFilters } from '@/components/vehicles/VehicleFilters';
+import type { Vehicle, VehicleSearchParams } from '@/types';
 import { getErrorMessage } from '@/utils/errors';
 
 export const DashboardPage = () => {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [actionError, setActionError] = useState('');
+  const [purchasingId, setPurchasingId] = useState('');
+  const [activeFilters, setActiveFilters] = useState<VehicleSearchParams | null>(
+    null
+  );
+
+  const loadVehicles = useCallback(async (filters: VehicleSearchParams | null) => {
+    setLoading(true);
+    setError('');
+    try {
+      const { data } = filters
+        ? await vehiclesApi.search(filters)
+        : await vehiclesApi.list();
+      setVehicles(data);
+    } catch (err) {
+      setError(getErrorMessage(err, 'Unable to load vehicles'));
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    let active = true;
+    void loadVehicles(null);
+  }, [loadVehicles]);
 
-    const loadVehicles = async () => {
-      setLoading(true);
-      setError('');
+  const handleSearch = (filters: VehicleSearchParams) => {
+    setActiveFilters(filters);
+    setActionError('');
+    void loadVehicles(filters);
+  };
 
-      try {
-        const { data } = await vehiclesApi.list();
-        if (active) {
-          setVehicles(data);
-        }
-      } catch (err) {
-        if (active) {
-          setError(getErrorMessage(err, 'Unable to load vehicles'));
-        }
-      } finally {
-        if (active) {
-          setLoading(false);
-        }
-      }
-    };
+  const handleClear = () => {
+    setActiveFilters(null);
+    setActionError('');
+    void loadVehicles(null);
+  };
 
-    void loadVehicles();
-
-    return () => {
-      active = false;
-    };
-  }, []);
+  const handlePurchase = async (vehicle: Vehicle) => {
+    setPurchasingId(vehicle.id);
+    setActionError('');
+    try {
+      await vehiclesApi.purchase(vehicle.id);
+      await loadVehicles(activeFilters);
+    } catch (err) {
+      setActionError(
+        getErrorMessage(err, `Unable to purchase ${vehicle.make} ${vehicle.model}`)
+      );
+    } finally {
+      setPurchasingId('');
+    }
+  };
 
   return (
     <AppShell title="Inventory">
+      <VehicleFilters
+        loading={loading}
+        onSearch={handleSearch}
+        onClear={handleClear}
+      />
+
+      {actionError ? (
+        <div
+          role="alert"
+          className="mb-6 rounded-2xl border border-signal/30 bg-signal/10 px-5 py-4 text-sm text-signal"
+        >
+          {actionError}
+        </div>
+      ) : null}
+
       {loading ? (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {Array.from({ length: 6 }).map((_, index) => (
@@ -68,7 +105,9 @@ export const DashboardPage = () => {
             No vehicles yet
           </p>
           <p className="mt-2 text-steel">
-            Inventory will appear here once vehicles are added.
+            {activeFilters
+              ? 'No vehicles match the selected filters.'
+              : 'Inventory will appear here once vehicles are added.'}
           </p>
         </div>
       ) : null}
@@ -76,7 +115,12 @@ export const DashboardPage = () => {
       {!loading && !error && vehicles.length > 0 ? (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {vehicles.map((vehicle) => (
-            <VehicleCard key={vehicle.id} vehicle={vehicle} />
+            <VehicleCard
+              key={vehicle.id}
+              vehicle={vehicle}
+              purchasing={purchasingId === vehicle.id}
+              onPurchase={handlePurchase}
+            />
           ))}
         </div>
       ) : null}

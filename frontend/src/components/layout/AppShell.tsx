@@ -8,7 +8,7 @@ interface AppShellProps {
 }
 
 export const AppShell = ({ title, children }: AppShellProps) => {
-  const { logout } = useAuth();
+  const { isAdmin, logout } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -27,13 +27,29 @@ export const AppShell = ({ title, children }: AppShellProps) => {
             {title}
           </h1>
         </div>
-        <button
-          type="button"
-          onClick={handleLogout}
-          className="self-start rounded-2xl border border-white/15 px-4 py-2 text-sm font-medium text-mist transition hover:border-amber hover:text-amber sm:self-auto"
-        >
-          Sign out
-        </button>
+        <nav className="flex flex-wrap items-center gap-3 self-start sm:self-auto">
+          <Link
+            to="/dashboard"
+            className="rounded-2xl border border-white/15 px-4 py-2 text-sm font-medium text-mist transition hover:border-amber hover:text-amber"
+          >
+            Inventory
+          </Link>
+          {isAdmin ? (
+            <Link
+              to="/admin/vehicles"
+              className="rounded-2xl border border-amber/50 px-4 py-2 text-sm font-medium text-amber transition hover:bg-amber/10"
+            >
+              Admin
+            </Link>
+          ) : null}
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="rounded-2xl border border-white/15 px-4 py-2 text-sm font-medium text-mist transition hover:border-amber hover:text-amber"
+          >
+            Sign out
+          </button>
+        </nav>
       </header>
       <main className="mx-auto mt-8 w-full max-w-7xl">{children}</main>
     </div>

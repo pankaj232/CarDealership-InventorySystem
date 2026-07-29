@@ -1,7 +1,10 @@
+import { Button } from '@/components/ui/Button';
 import type { Vehicle } from '@/types';
 
 interface VehicleCardProps {
   vehicle: Vehicle;
+  purchasing?: boolean;
+  onPurchase: (vehicle: Vehicle) => void;
 }
 
 const formatPrice = (price: number): string =>
@@ -11,7 +14,11 @@ const formatPrice = (price: number): string =>
     maximumFractionDigits: 0,
   }).format(price);
 
-export const VehicleCard = ({ vehicle }: VehicleCardProps) => {
+export const VehicleCard = ({
+  vehicle,
+  purchasing = false,
+  onPurchase,
+}: VehicleCardProps) => {
   const inStock = vehicle.quantity > 0;
 
   return (
@@ -39,6 +46,15 @@ export const VehicleCard = ({ vehicle }: VehicleCardProps) => {
           {inStock ? `${vehicle.quantity} in stock` : 'Out of stock'}
         </span>
       </div>
+      <Button
+        type="button"
+        className="mt-4"
+        disabled={!inStock}
+        loading={purchasing}
+        onClick={() => onPurchase(vehicle)}
+      >
+        {inStock ? 'Purchase' : 'Out of stock'}
+      </Button>
     </article>
   );
 };

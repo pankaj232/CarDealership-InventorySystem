@@ -11,9 +11,16 @@ export type VehicleCategory =
 
 export interface AuthUser {
   id: string;
-  name: string;
+  name?: string;
   email: string;
   role: UserRole;
+}
+
+export interface TokenPayload {
+  id: string;
+  email: string;
+  role: UserRole;
+  exp?: number;
 }
 
 export interface LoginResponse {
@@ -29,6 +36,22 @@ export interface Vehicle {
   quantity: number;
   createdAt?: string;
   updatedAt?: string;
+}
+
+export interface VehicleSearchParams {
+  make?: string;
+  model?: string;
+  category?: VehicleCategory;
+  minPrice?: number;
+  maxPrice?: number;
+}
+
+export interface VehiclePayload {
+  make: string;
+  model: string;
+  category: VehicleCategory;
+  price: number;
+  quantity: number;
 }
 
 export interface FieldError {
