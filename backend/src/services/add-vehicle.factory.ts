@@ -3,6 +3,7 @@ import { VehicleValidator } from '../validators/vehicle.validator';
 import { AddVehicleService } from './add-vehicle.service';
 import { DeleteVehicleService } from './delete-vehicle.service';
 import { ListVehiclesService } from './list-vehicles.service';
+import { PurchaseService } from './purchase.service';
 import { SearchVehiclesService } from './search-vehicles.service';
 import { UpdateVehicleService } from './update-vehicle.service';
 
@@ -26,3 +27,6 @@ export const createUpdateVehicleService = (): UpdateVehicleService =>
 
 export const createDeleteVehicleService = (): DeleteVehicleService =>
   new DeleteVehicleService(new MongooseVehicleRepository());
+
+export const createPurchaseService = (): PurchaseService =>
+  new PurchaseService(new MongooseVehicleRepository());

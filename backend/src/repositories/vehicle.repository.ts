@@ -31,6 +31,15 @@ export class MongooseVehicleRepository implements IVehicleRepository {
     return toPersistedVehicle(vehicle);
   }
 
+  async findById(id: string): Promise<PersistedVehicle | null> {
+    if (!isValidObjectId(id)) {
+      return null;
+    }
+
+    const vehicle = await Vehicle.findById(id);
+    return vehicle ? toPersistedVehicle(vehicle) : null;
+  }
+
   async findAll(
     pagination: VehiclePagination = {}
   ): Promise<PersistedVehicle[]> {
@@ -83,6 +92,20 @@ export class MongooseVehicleRepository implements IVehicleRepository {
       returnDocument: 'after',
       runValidators: true,
     });
+    return vehicle ? toPersistedVehicle(vehicle) : null;
+  }
+
+  async decreaseQuantity(id: string): Promise<PersistedVehicle | null> {
+    if (!isValidObjectId(id)) {
+      return null;
+    }
+
+    const vehicle = await Vehicle.findOneAndUpdate(
+      { _id: id, quantity: { $gt: 0 } },
+      { $inc: { quantity: -1 } },
+      { returnDocument: 'after' }
+    );
+
     return vehicle ? toPersistedVehicle(vehicle) : null;
   }
 

@@ -47,3 +47,10 @@ export class NotFoundError extends Error {
     this.name = 'NotFoundError';
   }
 }
+
+export class OutOfStockError extends Error {
+  constructor() {
+    super('Vehicle is out of stock');
+    this.name = 'OutOfStockError';
+  }
+}

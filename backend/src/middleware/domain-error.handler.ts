@@ -4,6 +4,7 @@ import {
   ForbiddenError,
   InvalidCredentialsError,
   NotFoundError,
+  OutOfStockError,
   UnauthorizedError,
   ValidationError,
 } from '../utils/errors';
@@ -23,6 +24,13 @@ export const domainErrorHandler = (
   }
 
   if (error instanceof DuplicateEmailError) {
+    res.status(409).json({
+      message: error.message,
+    });
+    return;
+  }
+
+  if (error instanceof OutOfStockError) {
     res.status(409).json({
       message: error.message,
     });

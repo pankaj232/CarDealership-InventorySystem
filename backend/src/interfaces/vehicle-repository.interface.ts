@@ -34,8 +34,10 @@ export interface VehicleSearchCriteria {
 
 export interface IVehicleRepository {
   create(data: CreateVehicleData): Promise<PersistedVehicle>;
+  findById(id: string): Promise<PersistedVehicle | null>;
   findAll(pagination?: VehiclePagination): Promise<PersistedVehicle[]>;
   search(criteria: VehicleSearchCriteria): Promise<PersistedVehicle[]>;
   update(id: string, data: CreateVehicleData): Promise<PersistedVehicle | null>;
+  decreaseQuantity(id: string): Promise<PersistedVehicle | null>;
   delete(id: string): Promise<boolean>;
 }

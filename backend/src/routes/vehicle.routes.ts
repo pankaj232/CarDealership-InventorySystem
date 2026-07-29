@@ -6,6 +6,7 @@ import {
   createAddVehicleService,
   createDeleteVehicleService,
   createListVehiclesService,
+  createPurchaseService,
   createSearchVehiclesService,
   createUpdateVehicleService,
 } from '../services/add-vehicle.factory';
@@ -16,12 +17,14 @@ const vehicleController = new VehicleController(
   createListVehiclesService(),
   createSearchVehiclesService(),
   createUpdateVehicleService(),
-  createDeleteVehicleService()
+  createDeleteVehicleService(),
+  createPurchaseService()
 );
 
 router.get('/', vehicleController.listVehicles);
 router.get('/search', vehicleController.searchVehicles);
 router.post('/', authenticate, vehicleController.addVehicle);
+router.post('/:id/purchase', authenticate, vehicleController.purchaseVehicle);
 router.put('/:id', authenticate, vehicleController.updateVehicle);
 router.delete(
   '/:id',

@@ -3,6 +3,7 @@ import { VehicleCategory } from '../interfaces/vehicle.interface';
 import { AddVehicleService } from '../services/add-vehicle.service';
 import { DeleteVehicleService } from '../services/delete-vehicle.service';
 import { ListVehiclesService } from '../services/list-vehicles.service';
+import { PurchaseService } from '../services/purchase.service';
 import { SearchVehiclesService } from '../services/search-vehicles.service';
 import { UpdateVehicleService } from '../services/update-vehicle.service';
 
@@ -12,7 +13,8 @@ export class VehicleController {
     private readonly listVehiclesService: ListVehiclesService,
     private readonly searchVehiclesService: SearchVehiclesService,
     private readonly updateVehicleService: UpdateVehicleService,
-    private readonly deleteVehicleService: DeleteVehicleService
+    private readonly deleteVehicleService: DeleteVehicleService,
+    private readonly purchaseService: PurchaseService
   ) {}
 
   addVehicle = async (
@@ -115,6 +117,21 @@ export class VehicleController {
     try {
       await this.deleteVehicleService.delete(req.params.id as string);
       res.status(204).send();
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  purchaseVehicle = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    try {
+      const vehicle = await this.purchaseService.purchase(
+        req.params.id as string
+      );
+      res.status(200).json(vehicle);
     } catch (error) {
       next(error);
     }
