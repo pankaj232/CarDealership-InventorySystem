@@ -1,5 +1,9 @@
 import { NextFunction, Request, Response } from 'express';
-import { DuplicateEmailError, ValidationError } from '../utils/errors';
+import {
+  DuplicateEmailError,
+  InvalidCredentialsError,
+  ValidationError,
+} from '../utils/errors';
 
 export const domainErrorHandler = (
   error: unknown,
@@ -17,6 +21,13 @@ export const domainErrorHandler = (
 
   if (error instanceof DuplicateEmailError) {
     res.status(409).json({
+      message: error.message,
+    });
+    return;
+  }
+
+  if (error instanceof InvalidCredentialsError) {
+    res.status(401).json({
       message: error.message,
     });
     return;
