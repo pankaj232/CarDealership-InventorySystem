@@ -13,7 +13,6 @@ const userSchema = new Schema<IUserDocument>(
     email: {
       type: String,
       required: [true, 'Email is required'],
-      unique: true,
       lowercase: true,
       trim: true,
     },
@@ -31,6 +30,26 @@ const userSchema = new Schema<IUserDocument>(
     timestamps: true,
   }
 );
+
+userSchema.index({ email: 1 }, { unique: true });
+
+userSchema.path('email').validate({
+  validator: async function (value: string) {
+    if (!this.isModified('email')) {
+      return true;
+    }
+
+    const UserModel = this.constructor as mongoose.Model<IUserDocument>;
+    const existing = await UserModel.findOne({ email: value });
+
+    if (!existing) {
+      return true;
+    }
+
+    return existing._id.equals(this._id);
+  },
+  message: 'Email already exists',
+});
 
 const User = mongoose.model<IUserDocument>('User', userSchema);
 

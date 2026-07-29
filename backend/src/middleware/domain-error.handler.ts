@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import {
   DuplicateEmailError,
   InvalidCredentialsError,
+  UnauthorizedError,
   ValidationError,
 } from '../utils/errors';
 
@@ -27,6 +28,13 @@ export const domainErrorHandler = (
   }
 
   if (error instanceof InvalidCredentialsError) {
+    res.status(401).json({
+      message: error.message,
+    });
+    return;
+  }
+
+  if (error instanceof UnauthorizedError) {
     res.status(401).json({
       message: error.message,
     });
