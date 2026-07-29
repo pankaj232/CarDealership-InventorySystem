@@ -1,0 +1,43 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-display: 'Syne', sans-serif;
+  --font-body: 'Manrope', sans-serif;
+  --color-ink: #0b1220;
+  --color-slate: #1a2438;
+  --color-mist: #e8eef7;
+  --color-steel: #6b7c99;
+  --color-amber: #f2b705;
+  --color-amber-deep: #d9a004;
+  --color-signal: #e85d4c;
+  --color-success: #2f9e78;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  color: var(--color-mist);
+  background:
+    radial-gradient(circle at top left, rgba(242, 183, 5, 0.12), transparent 32%),
+    radial-gradient(circle at top right, rgba(107, 124, 153, 0.18), transparent 28%),
+    linear-gradient(160deg, #070b14 0%, #0b1220 45%, #121c2f 100%);
+  background-attachment: fixed;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  letter-spacing: -0.03em;
+}
