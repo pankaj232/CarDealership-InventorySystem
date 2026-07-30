@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
+import { startMemoryMongo, stopMemoryMongo } from './helpers/mongo';
 import jwt from 'jsonwebtoken';
 import { RegistrationService } from '../services/registration.service';
 import { LoginService } from '../services/login.service';
@@ -19,16 +20,11 @@ describe('LoginService', () => {
 
   beforeAll(async () => {
     process.env.JWT_SECRET = jwtSecret;
-    mongoServer = await MongoMemoryServer.create();
-    await mongoose.connect(mongoServer.getUri());
+    mongoServer = await startMemoryMongo();
   }, 120000);
 
   afterAll(async () => {
-    await mongoose.connection.dropDatabase();
-    await mongoose.connection.close();
-    if (mongoServer) {
-      await mongoServer.stop();
-    }
+    await stopMemoryMongo(mongoServer);
   }, 30000);
 
   beforeEach(() => {

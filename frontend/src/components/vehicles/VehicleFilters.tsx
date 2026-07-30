@@ -1,17 +1,12 @@
 import { useState, type FormEvent } from 'react';
 import { Button } from '@/components/ui/Button';
 import { FormField } from '@/components/ui/FormField';
+import { SelectField } from '@/components/ui/SelectField';
+import {
+  VEHICLE_CATEGORIES,
+  formatCategoryLabel,
+} from '@/constants/vehicles';
 import type { VehicleCategory, VehicleSearchParams } from '@/types';
-
-const categories: VehicleCategory[] = [
-  'sedan',
-  'suv',
-  'truck',
-  'coupe',
-  'convertible',
-  'hatchback',
-  'van',
-];
 
 interface VehicleFiltersProps {
   loading: boolean;
@@ -26,7 +21,7 @@ export const VehicleFilters = ({
 }: VehicleFiltersProps) => {
   const [make, setMake] = useState('');
   const [model, setModel] = useState('');
-  const [category, setCategory] = useState('');
+  const [category, setCategory] = useState<VehicleCategory | ''>('');
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
   const [rangeError, setRangeError] = useState('');
@@ -45,7 +40,7 @@ export const VehicleFilters = ({
     onSearch({
       make: make.trim() || undefined,
       model: model.trim() || undefined,
-      category: (category || undefined) as VehicleCategory | undefined,
+      category: category || undefined,
       minPrice: minimum,
       maxPrice: maximum,
     });
@@ -69,33 +64,36 @@ export const VehicleFilters = ({
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
         <FormField
           label="Make"
+          name="make"
           value={make}
           onChange={(event) => setMake(event.target.value)}
           placeholder="Toyota"
         />
         <FormField
           label="Model"
+          name="model"
           value={model}
           onChange={(event) => setModel(event.target.value)}
           placeholder="Camry"
         />
-        <label className="block space-y-2">
-          <span className="text-sm font-medium text-mist/90">Category</span>
-          <select
-            value={category}
-            onChange={(event) => setCategory(event.target.value)}
-            className="w-full rounded-2xl border border-white/10 bg-ink/60 px-4 py-3 text-mist outline-none transition focus:border-amber focus:ring-2 focus:ring-amber/30"
-          >
-            <option value="">All categories</option>
-            {categories.map((item) => (
-              <option key={item} value={item}>
-                {item.charAt(0).toUpperCase() + item.slice(1)}
-              </option>
-            ))}
-          </select>
-        </label>
+        <SelectField
+          label="Category"
+          name="category"
+          value={category}
+          onChange={(event) =>
+            setCategory(event.target.value as VehicleCategory | '')
+          }
+        >
+          <option value="">All categories</option>
+          {VEHICLE_CATEGORIES.map((item) => (
+            <option key={item} value={item}>
+              {formatCategoryLabel(item)}
+            </option>
+          ))}
+        </SelectField>
         <FormField
           label="Minimum price"
+          name="minPrice"
           type="number"
           min="0"
           step="0.01"
@@ -105,6 +103,7 @@ export const VehicleFilters = ({
         />
         <FormField
           label="Maximum price"
+          name="maxPrice"
           type="number"
           min="0"
           step="0.01"
@@ -113,7 +112,11 @@ export const VehicleFilters = ({
           placeholder="100000"
         />
       </div>
-      {rangeError ? <p className="mt-3 text-sm text-signal">{rangeError}</p> : null}
+      {rangeError ? (
+        <p role="alert" className="mt-3 text-sm text-signal">
+          {rangeError}
+        </p>
+      ) : null}
       <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:justify-end">
         <button
           type="button"

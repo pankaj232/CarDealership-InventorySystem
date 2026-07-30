@@ -1,50 +1,36 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useState } from 'react';
 import { vehiclesApi } from '@/api/vehicles';
 import { AppShell } from '@/components/layout/AppShell';
+import { Alert } from '@/components/ui/Alert';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { VehicleCard } from '@/components/vehicles/VehicleCard';
+import { VehicleCardSkeleton } from '@/components/vehicles/VehicleCardSkeleton';
 import { VehicleFilters } from '@/components/vehicles/VehicleFilters';
+import { useVehicles } from '@/hooks/useVehicles';
 import type { Vehicle, VehicleSearchParams } from '@/types';
 import { getErrorMessage } from '@/utils/errors';
 
 export const DashboardPage = () => {
-  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const {
+    vehicles,
+    loading,
+    error,
+    filters,
+    search,
+    clearFilters,
+    refresh,
+  } = useVehicles();
   const [actionError, setActionError] = useState('');
   const [purchasingId, setPurchasingId] = useState('');
-  const [activeFilters, setActiveFilters] = useState<VehicleSearchParams | null>(
-    null
-  );
 
-  const loadVehicles = useCallback(async (filters: VehicleSearchParams | null) => {
-    setLoading(true);
-    setError('');
-    try {
-      const { data } = filters
-        ? await vehiclesApi.search(filters)
-        : await vehiclesApi.list();
-      setVehicles(data);
-    } catch (err) {
-      setError(getErrorMessage(err, 'Unable to load vehicles'));
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    void loadVehicles(null);
-  }, [loadVehicles]);
-
-  const handleSearch = (filters: VehicleSearchParams) => {
-    setActiveFilters(filters);
+  const handleSearch = (nextFilters: VehicleSearchParams) => {
     setActionError('');
-    void loadVehicles(filters);
+    search(nextFilters);
   };
 
   const handleClear = () => {
-    setActiveFilters(null);
     setActionError('');
-    void loadVehicles(null);
+    clearFilters();
   };
 
   const handlePurchase = async (vehicle: Vehicle) => {
@@ -52,10 +38,13 @@ export const DashboardPage = () => {
     setActionError('');
     try {
       await vehiclesApi.purchase(vehicle.id);
-      await loadVehicles(activeFilters);
+      await refresh();
     } catch (err) {
       setActionError(
-        getErrorMessage(err, `Unable to purchase ${vehicle.make} ${vehicle.model}`)
+        getErrorMessage(
+          err,
+          `Unable to purchase ${vehicle.make} ${vehicle.model}`
+        )
       );
     } finally {
       setPurchasingId('');
@@ -70,46 +59,30 @@ export const DashboardPage = () => {
         onClear={handleClear}
       />
 
-      {actionError ? (
-        <div
-          role="alert"
-          className="mb-6 rounded-2xl border border-signal/30 bg-signal/10 px-5 py-4 text-sm text-signal"
-        >
-          {actionError}
-        </div>
-      ) : null}
+      {actionError ? <Alert className="mb-6 px-5 py-4">{actionError}</Alert> : null}
 
-      {loading ? (
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {Array.from({ length: 6 }).map((_, index) => (
-            <div
-              key={index}
-              className="h-52 animate-pulse rounded-3xl border border-white/10 bg-slate/40"
-            />
-          ))}
-        </div>
-      ) : null}
+      {loading ? <VehicleCardSkeleton /> : null}
 
       {!loading && error ? (
         <div className="rounded-3xl border border-signal/30 bg-signal/10 px-6 py-8 text-center">
           <p className="font-display text-xl font-bold text-mist">
             Couldn’t load inventory
           </p>
-          <p className="mt-2 text-sm text-signal">{error}</p>
+          <p className="mt-2 text-sm text-signal" role="alert">
+            {error}
+          </p>
         </div>
       ) : null}
 
       {!loading && !error && vehicles.length === 0 ? (
-        <div className="rounded-3xl border border-white/10 bg-slate/40 px-6 py-16 text-center">
-          <p className="font-display text-2xl font-bold text-mist">
-            No vehicles yet
-          </p>
-          <p className="mt-2 text-steel">
-            {activeFilters
+        <EmptyState
+          title="No vehicles yet"
+          description={
+            filters
               ? 'No vehicles match the selected filters.'
-              : 'Inventory will appear here once vehicles are added.'}
-          </p>
-        </div>
+              : 'Inventory will appear here once vehicles are added.'
+          }
+        />
       ) : null}
 
       {!loading && !error && vehicles.length > 0 ? (

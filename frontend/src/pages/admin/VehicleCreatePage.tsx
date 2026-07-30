@@ -1,39 +1,30 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { vehiclesApi } from '@/api/vehicles';
 import { AppShell } from '@/components/layout/AppShell';
+import { Alert } from '@/components/ui/Alert';
 import { VehicleForm } from '@/components/vehicles/VehicleForm';
+import { useMutation } from '@/hooks/useMutation';
 import type { VehiclePayload } from '@/types';
-import { getErrorMessage, getFieldErrors } from '@/utils/errors';
 
 export const VehicleCreatePage = () => {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const { loading, error, fieldErrors, submit } = useMutation(
+    async (payload: VehiclePayload) => {
+      await vehiclesApi.create(payload);
+    },
+    { fallbackMessage: 'Unable to create vehicle' }
+  );
 
   const handleSubmit = async (payload: VehiclePayload) => {
-    setLoading(true);
-    setError('');
-    setFieldErrors({});
-    try {
-      await vehiclesApi.create(payload);
+    const ok = await submit(payload);
+    if (ok) {
       navigate('/admin/vehicles');
-    } catch (err) {
-      setError(getErrorMessage(err, 'Unable to create vehicle'));
-      setFieldErrors(getFieldErrors(err));
-    } finally {
-      setLoading(false);
     }
   };
 
   return (
     <AppShell title="Create vehicle">
-      {error ? (
-        <p className="mb-5 rounded-2xl border border-signal/30 bg-signal/10 px-5 py-4 text-sm text-signal">
-          {error}
-        </p>
-      ) : null}
+      {error ? <Alert className="mb-5 px-5 py-4">{error}</Alert> : null}
       <VehicleForm
         submitLabel="Create vehicle"
         loading={loading}

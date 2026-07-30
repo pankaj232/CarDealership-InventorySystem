@@ -8,11 +8,11 @@ export class LoginValidator implements ILoginValidator {
   validate(input: LoginInput): void {
     const errors: FieldError[] = [];
 
-    if (!input.email || !input.email.trim()) {
+    if (typeof input.email !== 'string' || !input.email.trim()) {
       errors.push({ field: 'email', message: 'Email is required' });
     }
 
-    if (!input.password) {
+    if (typeof input.password !== 'string' || !input.password) {
       errors.push({ field: 'password', message: 'Password is required' });
     }
 

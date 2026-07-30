@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
+import { startMemoryMongo, stopMemoryMongo } from './helpers/mongo';
 import bcrypt from 'bcrypt';
 import User from '../models/user.model';
 import { RegistrationService } from '../services/registration.service';
@@ -13,16 +14,11 @@ describe('RegistrationService', () => {
   let registrationService: RegistrationService;
 
   beforeAll(async () => {
-    mongoServer = await MongoMemoryServer.create();
-    await mongoose.connect(mongoServer.getUri());
+    mongoServer = await startMemoryMongo();
   }, 120000);
 
   afterAll(async () => {
-    await mongoose.connection.dropDatabase();
-    await mongoose.connection.close();
-    if (mongoServer) {
-      await mongoServer.stop();
-    }
+    await stopMemoryMongo(mongoServer);
   }, 30000);
 
   beforeEach(() => {

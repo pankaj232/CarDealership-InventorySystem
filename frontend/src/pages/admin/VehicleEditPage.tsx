@@ -2,63 +2,79 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { vehiclesApi } from '@/api/vehicles';
 import { AppShell } from '@/components/layout/AppShell';
+import { Alert } from '@/components/ui/Alert';
 import { VehicleForm } from '@/components/vehicles/VehicleForm';
+import { useMutation } from '@/hooks/useMutation';
 import type { Vehicle, VehiclePayload } from '@/types';
-import { getErrorMessage, getFieldErrors } from '@/utils/errors';
+import { getErrorMessage } from '@/utils/errors';
 
 export const VehicleEditPage = () => {
   const { id = '' } = useParams();
   const navigate = useNavigate();
   const [vehicle, setVehicle] = useState<Vehicle | null>(null);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [loadError, setLoadError] = useState('');
+  const {
+    loading: saving,
+    error,
+    fieldErrors,
+    submit,
+  } = useMutation(
+    async (payload: VehiclePayload) => {
+      await vehiclesApi.update(id, payload);
+    },
+    { fallbackMessage: 'Unable to update vehicle' }
+  );
 
   useEffect(() => {
+    let active = true;
+
     const loadVehicle = async () => {
       try {
-        const { data } = await vehiclesApi.list();
+        const data = await vehiclesApi.list();
         const match = data.find((item) => item.id === id);
+        if (!active) return;
         if (!match) {
-          setError('Vehicle not found');
+          setLoadError('Vehicle not found');
           return;
         }
         setVehicle(match);
       } catch (err) {
-        setError(getErrorMessage(err, 'Unable to load vehicle'));
+        if (active) {
+          setLoadError(getErrorMessage(err, 'Unable to load vehicle'));
+        }
       } finally {
-        setLoading(false);
+        if (active) {
+          setLoading(false);
+        }
       }
     };
+
     void loadVehicle();
+
+    return () => {
+      active = false;
+    };
   }, [id]);
 
   const handleSubmit = async (payload: VehiclePayload) => {
-    setSaving(true);
-    setError('');
-    setFieldErrors({});
-    try {
-      await vehiclesApi.update(id, payload);
+    const ok = await submit(payload);
+    if (ok) {
       navigate('/admin/vehicles');
-    } catch (err) {
-      setError(getErrorMessage(err, 'Unable to update vehicle'));
-      setFieldErrors(getFieldErrors(err));
-    } finally {
-      setSaving(false);
     }
   };
 
+  const displayError = error || loadError;
+
   return (
     <AppShell title="Update vehicle">
-      {error ? (
-        <p className="mb-5 rounded-2xl border border-signal/30 bg-signal/10 px-5 py-4 text-sm text-signal">
-          {error}
-        </p>
+      {displayError ? (
+        <Alert className="mb-5 px-5 py-4">{displayError}</Alert>
       ) : null}
       {loading ? <p className="text-steel">Loading vehicle…</p> : null}
       {!loading && vehicle ? (
         <VehicleForm
+          key={vehicle.id}
           initialValue={{
             make: vehicle.make,
             model: vehicle.model,

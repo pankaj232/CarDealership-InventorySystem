@@ -1,9 +1,8 @@
-import jwt from 'jsonwebtoken';
-import mongoose from 'mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
+import { startMemoryMongo, stopMemoryMongo } from './helpers/mongo';
+import { tokenFor } from './helpers/auth';
 import request from 'supertest';
 import app from '../app';
-import config from '../config';
 import Vehicle from '../models/vehicle.model';
 import { UserRole } from '../interfaces/user.interface';
 
@@ -11,14 +10,11 @@ describe('POST /api/vehicles', () => {
   let mongoServer: MongoMemoryServer;
 
   beforeAll(async () => {
-    mongoServer = await MongoMemoryServer.create();
-    await mongoose.connect(mongoServer.getUri());
+    mongoServer = await startMemoryMongo();
   }, 120000);
 
   afterAll(async () => {
-    await mongoose.connection.dropDatabase();
-    await mongoose.connection.close();
-    await mongoServer.stop();
+    await stopMemoryMongo(mongoServer);
   }, 30000);
 
   afterEach(async () => {
@@ -32,17 +28,6 @@ describe('POST /api/vehicles', () => {
     price: 25000,
     quantity: 5,
   };
-
-  const tokenFor = (role: UserRole): string =>
-    jwt.sign(
-      {
-        id: new mongoose.Types.ObjectId().toString(),
-        email: `${role}@example.com`,
-        role,
-      },
-      config.jwtSecret,
-      { expiresIn: '1h' }
-    );
 
   it.each<UserRole>(['user', 'admin'])(
     'should allow a %s to add a vehicle',

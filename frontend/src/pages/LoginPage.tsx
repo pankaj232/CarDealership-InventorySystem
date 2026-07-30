@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { AuthLayout } from '@/components/layout/AuthLayout';
+import { Alert } from '@/components/ui/Alert';
 import { Button } from '@/components/ui/Button';
 import { FormField } from '@/components/ui/FormField';
 import { useAuth } from '@/context/AuthContext';
@@ -91,11 +92,7 @@ export const LoginPage = () => {
             }))
           }
         />
-        {formError ? (
-          <p className="rounded-2xl border border-signal/30 bg-signal/10 px-4 py-3 text-sm text-signal">
-            {formError}
-          </p>
-        ) : null}
+        {formError ? <Alert>{formError}</Alert> : null}
         <Button type="submit" loading={loading}>
           Sign in
         </Button>

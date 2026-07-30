@@ -1,6 +1,7 @@
 import request from 'supertest';
 import mongoose from 'mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
+import { startMemoryMongo, stopMemoryMongo } from './helpers/mongo';
 import jwt from 'jsonwebtoken';
 import app from '../app';
 
@@ -15,16 +16,11 @@ describe('POST /api/auth/login', () => {
   };
 
   beforeAll(async () => {
-    mongoServer = await MongoMemoryServer.create();
-    await mongoose.connect(mongoServer.getUri());
+    mongoServer = await startMemoryMongo();
   }, 120000);
 
   afterAll(async () => {
-    await mongoose.connection.dropDatabase();
-    await mongoose.connection.close();
-    if (mongoServer) {
-      await mongoServer.stop();
-    }
+    await stopMemoryMongo(mongoServer);
   }, 30000);
 
   afterEach(async () => {

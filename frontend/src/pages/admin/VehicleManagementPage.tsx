@@ -1,35 +1,19 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { vehiclesApi } from '@/api/vehicles';
 import { AppShell } from '@/components/layout/AppShell';
+import { Alert } from '@/components/ui/Alert';
+import { useVehicles } from '@/hooks/useVehicles';
 import type { Vehicle } from '@/types';
+import { formatCurrency } from '@/utils/format';
 import { getErrorMessage } from '@/utils/errors';
 
 export const VehicleManagementPage = () => {
-  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const { vehicles, loading, error, refresh, setError } = useVehicles();
   const [busyId, setBusyId] = useState('');
   const [restockAmounts, setRestockAmounts] = useState<Record<string, string>>(
     {}
   );
-
-  const loadVehicles = useCallback(async () => {
-    setLoading(true);
-    setError('');
-    try {
-      const { data } = await vehiclesApi.list();
-      setVehicles(data);
-    } catch (err) {
-      setError(getErrorMessage(err, 'Unable to load vehicles'));
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    void loadVehicles();
-  }, [loadVehicles]);
 
   const handleDelete = async (vehicle: Vehicle) => {
     if (!window.confirm(`Delete ${vehicle.make} ${vehicle.model}?`)) return;
@@ -37,7 +21,7 @@ export const VehicleManagementPage = () => {
     setError('');
     try {
       await vehiclesApi.delete(vehicle.id);
-      await loadVehicles();
+      await refresh();
     } catch (err) {
       setError(getErrorMessage(err, 'Unable to delete vehicle'));
     } finally {
@@ -57,7 +41,7 @@ export const VehicleManagementPage = () => {
     try {
       await vehiclesApi.restock(vehicle.id, amount);
       setRestockAmounts((current) => ({ ...current, [vehicle.id]: '' }));
-      await loadVehicles();
+      await refresh();
     } catch (err) {
       setError(getErrorMessage(err, 'Unable to restock vehicle'));
     } finally {
@@ -76,14 +60,7 @@ export const VehicleManagementPage = () => {
         </Link>
       </div>
 
-      {error ? (
-        <p
-          role="alert"
-          className="mb-5 rounded-2xl border border-signal/30 bg-signal/10 px-5 py-4 text-sm text-signal"
-        >
-          {error}
-        </p>
-      ) : null}
+      {error ? <Alert className="mb-5 px-5 py-4">{error}</Alert> : null}
 
       {loading ? <p className="text-steel">Loading inventory…</p> : null}
       {!loading && vehicles.length === 0 ? (
@@ -100,17 +77,21 @@ export const VehicleManagementPage = () => {
               <article
                 key={vehicle.id}
                 className="rounded-3xl border border-white/10 bg-slate/55 p-5 sm:p-6"
+                aria-labelledby={`admin-vehicle-${vehicle.id}`}
               >
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.18em] text-steel">
                       {vehicle.category}
                     </p>
-                    <h2 className="mt-2 font-display text-xl font-bold text-mist">
+                    <h2
+                      id={`admin-vehicle-${vehicle.id}`}
+                      className="mt-2 font-display text-xl font-bold text-mist"
+                    >
                       {vehicle.make} {vehicle.model}
                     </h2>
                     <p className="mt-1 text-sm text-steel">
-                      ${vehicle.price.toLocaleString()} · {vehicle.quantity} in
+                      {formatCurrency(vehicle.price)} · {vehicle.quantity} in
                       stock
                     </p>
                   </div>
@@ -136,6 +117,7 @@ export const VehicleManagementPage = () => {
                         type="button"
                         disabled={busy}
                         onClick={() => void handleRestock(vehicle)}
+                        aria-label={`Restock ${vehicle.make} ${vehicle.model}`}
                         className="rounded-xl border border-amber/50 px-4 py-2 font-semibold text-amber transition hover:bg-amber/10 disabled:opacity-60"
                       >
                         Restock
@@ -143,6 +125,7 @@ export const VehicleManagementPage = () => {
                     </div>
                     <Link
                       to={`/admin/vehicles/${vehicle.id}/edit`}
+                      aria-label={`Edit ${vehicle.make} ${vehicle.model}`}
                       className="rounded-xl border border-white/15 px-4 py-2 text-center font-semibold text-mist transition hover:border-amber hover:text-amber"
                     >
                       Edit
@@ -151,6 +134,7 @@ export const VehicleManagementPage = () => {
                       type="button"
                       disabled={busy}
                       onClick={() => void handleDelete(vehicle)}
+                      aria-label={`Delete ${vehicle.make} ${vehicle.model}`}
                       className="rounded-xl border border-signal/40 px-4 py-2 font-semibold text-signal transition hover:bg-signal/10 disabled:opacity-60"
                     >
                       Delete

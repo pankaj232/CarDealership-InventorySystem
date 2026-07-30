@@ -3,54 +3,69 @@ export interface FieldError {
   message: string;
 }
 
-export class ValidationError extends Error {
+export abstract class AppError extends Error {
+  abstract readonly statusCode: number;
+
+  constructor(message: string) {
+    super(message);
+    this.name = new.target.name;
+  }
+}
+
+export class ValidationError extends AppError {
+  readonly statusCode = 400;
   readonly errors: FieldError[];
 
   constructor(errors: FieldError[]) {
     super('Validation failed');
-    this.name = 'ValidationError';
     this.errors = errors;
   }
 }
 
-export class DuplicateEmailError extends Error {
+export class DuplicateEmailError extends AppError {
+  readonly statusCode = 409;
+
   constructor(email: string) {
     super(`Email already registered: ${email}`);
-    this.name = 'DuplicateEmailError';
   }
 }
 
-export class InvalidCredentialsError extends Error {
+export class InvalidCredentialsError extends AppError {
+  readonly statusCode = 401;
+
   constructor() {
     super('Invalid email or password');
-    this.name = 'InvalidCredentialsError';
   }
 }
 
-export class UnauthorizedError extends Error {
+export class UnauthorizedError extends AppError {
+  readonly statusCode = 401;
+
   constructor(message = 'Authentication required') {
     super(message);
-    this.name = 'UnauthorizedError';
   }
 }
 
-export class ForbiddenError extends Error {
+export class ForbiddenError extends AppError {
+  readonly statusCode = 403;
+
   constructor(message = 'Forbidden') {
     super(message);
-    this.name = 'ForbiddenError';
   }
 }
 
-export class NotFoundError extends Error {
+export class NotFoundError extends AppError {
+  readonly statusCode = 404;
+
   constructor(resource: string) {
     super(`${resource} not found`);
-    this.name = 'NotFoundError';
   }
 }
 
-export class OutOfStockError extends Error {
+export class OutOfStockError extends AppError {
+  readonly statusCode = 409;
+
   constructor() {
     super('Vehicle is out of stock');
-    this.name = 'OutOfStockError';
   }
 }

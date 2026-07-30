@@ -8,7 +8,8 @@ import {
 } from 'react';
 import { authApi } from '@/api/auth';
 import type { LoginPayload, RegisterPayload } from '@/api/auth';
-import type { AuthUser, TokenPayload } from '@/types';
+import type { AuthUser } from '@/types';
+import { decodeToken } from '@/utils/jwt';
 import { tokenStorage } from '@/utils/tokenStorage';
 
 interface AuthContextValue {
@@ -23,54 +24,26 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
-const getUserFromToken = (token: string | null): AuthUser | null => {
-  if (!token) return null;
-
-  try {
-    const encodedPayload = token.split('.')[1];
-    if (!encodedPayload) return null;
-    const normalized = encodedPayload.replace(/-/g, '+').replace(/_/g, '/');
-    const payload = JSON.parse(atob(normalized)) as TokenPayload;
-
-    if (
-      !payload.id ||
-      !payload.email ||
-      !['user', 'admin'].includes(payload.role) ||
-      (payload.exp && payload.exp * 1000 <= Date.now())
-    ) {
-      return null;
-    }
-
-    return {
-      id: payload.id,
-      email: payload.email,
-      role: payload.role,
-    };
-  } catch {
-    return null;
-  }
-};
-
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [token, setToken] = useState<string | null>(() => {
     const stored = tokenStorage.get();
-    if (!getUserFromToken(stored)) {
+    if (!decodeToken(stored)) {
       tokenStorage.clear();
       return null;
     }
     return stored;
   });
-  const user = useMemo(() => getUserFromToken(token), [token]);
+  const user = useMemo(() => decodeToken(token), [token]);
 
   const login = useCallback(async (payload: LoginPayload) => {
-    const { data } = await authApi.login(payload);
+    const data = await authApi.login(payload);
     tokenStorage.set(data.token);
     setToken(data.token);
   }, []);
 
   const register = useCallback(async (payload: RegisterPayload) => {
     await authApi.register(payload);
-    const { data } = await authApi.login({
+    const data = await authApi.login({
       email: payload.email,
       password: payload.password,
     });

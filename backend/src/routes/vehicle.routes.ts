@@ -10,7 +10,7 @@ import {
   createRestockService,
   createSearchVehiclesService,
   createUpdateVehicleService,
-} from '../services/add-vehicle.factory';
+} from '../services/vehicle.factory';
 
 const router = Router();
 const vehicleController = new VehicleController(

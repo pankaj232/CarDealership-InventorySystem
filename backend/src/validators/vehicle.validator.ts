@@ -1,46 +1,40 @@
+import { VEHICLE_CATEGORIES } from '../constants/vehicle.constants';
 import { CreateVehicleData } from '../interfaces/vehicle-repository.interface';
 import { IVehicleValidator } from '../interfaces/vehicle-validator.interface';
 import { FieldError, ValidationError } from '../utils/errors';
-import { VehicleCategory } from '../interfaces/vehicle.interface';
-
-const VALID_CATEGORIES: VehicleCategory[] = [
-  'sedan',
-  'suv',
-  'truck',
-  'coupe',
-  'convertible',
-  'hatchback',
-  'van',
-];
 
 export class VehicleValidator implements IVehicleValidator {
   validate(input: CreateVehicleData): void {
     const errors: FieldError[] = [];
 
-    if (!input.make || !input.make.trim()) {
+    if (typeof input.make !== 'string' || !input.make.trim()) {
       errors.push({ field: 'make', message: 'Make is required' });
     }
 
-    if (!input.model || !input.model.trim()) {
+    if (typeof input.model !== 'string' || !input.model.trim()) {
       errors.push({ field: 'model', message: 'Model is required' });
     }
 
-    if (!input.category || !input.category.trim()) {
+    if (typeof input.category !== 'string' || !input.category.trim()) {
       errors.push({ field: 'category', message: 'Category is required' });
-    } else if (!VALID_CATEGORIES.includes(input.category)) {
+    } else if (
+      !VEHICLE_CATEGORIES.includes(
+        input.category as (typeof VEHICLE_CATEGORIES)[number]
+      )
+    ) {
       errors.push({
         field: 'category',
-        message: `Category must be one of: ${VALID_CATEGORIES.join(', ')}`,
+        message: `Category must be one of: ${VEHICLE_CATEGORIES.join(', ')}`,
       });
     }
 
-    if (input.price === undefined || input.price === null) {
+    if (typeof input.price !== 'number' || Number.isNaN(input.price)) {
       errors.push({ field: 'price', message: 'Price is required' });
     } else if (input.price <= 0) {
       errors.push({ field: 'price', message: 'Price must be greater than 0' });
     }
 
-    if (input.quantity === undefined || input.quantity === null) {
+    if (typeof input.quantity !== 'number' || Number.isNaN(input.quantity)) {
       errors.push({ field: 'quantity', message: 'Quantity is required' });
     } else if (input.quantity < 0) {
       errors.push({

@@ -1,4 +1,4 @@
-import api from '@/api/client';
+import { api } from '@/api/client';
 import type {
   Vehicle,
   VehiclePayload,
@@ -6,25 +6,33 @@ import type {
 } from '@/types';
 
 export const vehiclesApi = {
-  list() {
-    return api.get<Vehicle[]>('/vehicles');
+  async list(): Promise<Vehicle[]> {
+    const { data } = await api.get<Vehicle[]>('/vehicles');
+    return data;
   },
-  search(params: VehicleSearchParams) {
-    return api.get<Vehicle[]>('/vehicles/search', { params });
+  async search(params: VehicleSearchParams): Promise<Vehicle[]> {
+    const { data } = await api.get<Vehicle[]>('/vehicles/search', { params });
+    return data;
   },
-  create(payload: VehiclePayload) {
-    return api.post<Vehicle>('/vehicles', payload);
+  async create(payload: VehiclePayload): Promise<Vehicle> {
+    const { data } = await api.post<Vehicle>('/vehicles', payload);
+    return data;
   },
-  update(id: string, payload: VehiclePayload) {
-    return api.put<Vehicle>(`/vehicles/${id}`, payload);
+  async update(id: string, payload: VehiclePayload): Promise<Vehicle> {
+    const { data } = await api.put<Vehicle>(`/vehicles/${id}`, payload);
+    return data;
   },
-  delete(id: string) {
-    return api.delete(`/vehicles/${id}`);
+  async delete(id: string): Promise<void> {
+    await api.delete(`/vehicles/${id}`);
   },
-  purchase(id: string) {
-    return api.post<Vehicle>(`/vehicles/${id}/purchase`);
+  async purchase(id: string): Promise<Vehicle> {
+    const { data } = await api.post<Vehicle>(`/vehicles/${id}/purchase`);
+    return data;
   },
-  restock(id: string, amount: number) {
-    return api.post<Vehicle>(`/vehicles/${id}/restock`, { amount });
+  async restock(id: string, amount: number): Promise<Vehicle> {
+    const { data } = await api.post<Vehicle>(`/vehicles/${id}/restock`, {
+      amount,
+    });
+    return data;
   },
 };

@@ -11,17 +11,17 @@ export class RegistrationValidator implements IRegistrationValidator {
   validate(input: RegisterInput): void {
     const errors: FieldError[] = [];
 
-    if (!input.name || !input.name.trim()) {
+    if (typeof input.name !== 'string' || !input.name.trim()) {
       errors.push({ field: 'name', message: 'Name is required' });
     }
 
-    if (!input.email || !input.email.trim()) {
+    if (typeof input.email !== 'string' || !input.email.trim()) {
       errors.push({ field: 'email', message: 'Email is required' });
     } else if (!EMAIL_REGEX.test(input.email.trim())) {
       errors.push({ field: 'email', message: 'Email format is invalid' });
     }
 
-    if (!input.password) {
+    if (typeof input.password !== 'string' || !input.password) {
       errors.push({ field: 'password', message: 'Password is required' });
     } else if (input.password.length < MIN_PASSWORD_LENGTH) {
       errors.push({

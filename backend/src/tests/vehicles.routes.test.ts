@@ -1,9 +1,9 @@
-import jwt from 'jsonwebtoken';
 import mongoose from 'mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
+import { startMemoryMongo, stopMemoryMongo } from './helpers/mongo';
+import { tokenFor } from './helpers/auth';
 import request from 'supertest';
 import app from '../app';
-import config from '../config';
 import { UserRole } from '../interfaces/user.interface';
 import { IVehicle } from '../interfaces/vehicle.interface';
 import Vehicle from '../models/vehicle.model';
@@ -12,30 +12,16 @@ describe('Vehicle routes', () => {
   let mongoServer: MongoMemoryServer;
 
   beforeAll(async () => {
-    mongoServer = await MongoMemoryServer.create();
-    await mongoose.connect(mongoServer.getUri());
+    mongoServer = await startMemoryMongo();
   }, 120000);
 
   afterAll(async () => {
-    await mongoose.connection.dropDatabase();
-    await mongoose.connection.close();
-    await mongoServer.stop();
+    await stopMemoryMongo(mongoServer);
   }, 30000);
 
   afterEach(async () => {
     await Vehicle.deleteMany({});
   });
-
-  const tokenFor = (role: UserRole): string =>
-    jwt.sign(
-      {
-        id: new mongoose.Types.ObjectId().toString(),
-        email: `${role}@example.com`,
-        role,
-      },
-      config.jwtSecret,
-      { expiresIn: '1h' }
-    );
 
   const vehicles: IVehicle[] = [
     {

@@ -9,8 +9,9 @@
     "start": "node dist/server.js",
     "test": "jest --runInBand",
     "test:watch": "jest --watch --runInBand",
-    "lint": "eslint src --ext .ts",
-    "lint:fix": "eslint src --ext .ts --fix",
+    "test:coverage": "jest --runInBand --coverage",
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix",
     "format": "prettier --write \"src/**/*.ts\"",
     "format:check": "prettier --check \"src/**/*.ts\""
   },

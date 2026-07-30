@@ -6,5 +6,6 @@ export const connectDatabase = async (): Promise<void> => {
 
   await mongoose.connect(config.mongodbUri);
 
-  console.log(`MongoDB connected: ${config.mongodbUri}`);
+  const dbName = mongoose.connection.name || 'unknown';
+  console.log(`MongoDB connected: ${dbName}`);
 };

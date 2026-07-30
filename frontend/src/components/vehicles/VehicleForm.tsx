@@ -1,17 +1,12 @@
 import { useState, type FormEvent } from 'react';
 import { Button } from '@/components/ui/Button';
 import { FormField } from '@/components/ui/FormField';
+import { SelectField } from '@/components/ui/SelectField';
+import {
+  VEHICLE_CATEGORIES,
+  formatCategoryLabel,
+} from '@/constants/vehicles';
 import type { VehicleCategory, VehiclePayload } from '@/types';
-
-const categories: VehicleCategory[] = [
-  'sedan',
-  'suv',
-  'truck',
-  'coupe',
-  'convertible',
-  'hatchback',
-  'van',
-];
 
 interface VehicleFormProps {
   initialValue?: VehiclePayload;
@@ -57,6 +52,7 @@ export const VehicleForm = ({
       <div className="grid gap-5 sm:grid-cols-2">
         <FormField
           label="Make"
+          name="make"
           required
           value={make}
           onChange={(event) => setMake(event.target.value)}
@@ -64,37 +60,31 @@ export const VehicleForm = ({
         />
         <FormField
           label="Model"
+          name="model"
           required
           value={model}
           onChange={(event) => setModel(event.target.value)}
           error={fieldErrors.model}
         />
-        <label className="block space-y-2">
-          <span className="text-sm font-medium text-mist/90">Category</span>
-          <select
-            required
-            value={category}
-            onChange={(event) =>
-              setCategory(event.target.value as VehicleCategory)
-            }
-            className={`w-full rounded-2xl border bg-ink/60 px-4 py-3 text-mist outline-none transition focus:border-amber focus:ring-2 focus:ring-amber/30 ${
-              fieldErrors.category ? 'border-signal' : 'border-white/10'
-            }`}
-          >
-            {categories.map((item) => (
-              <option key={item} value={item}>
-                {item.charAt(0).toUpperCase() + item.slice(1)}
-              </option>
-            ))}
-          </select>
-          {fieldErrors.category ? (
-            <span className="block text-sm text-signal">
-              {fieldErrors.category}
-            </span>
-          ) : null}
-        </label>
+        <SelectField
+          label="Category"
+          name="category"
+          required
+          value={category}
+          onChange={(event) =>
+            setCategory(event.target.value as VehicleCategory)
+          }
+          error={fieldErrors.category}
+        >
+          {VEHICLE_CATEGORIES.map((item) => (
+            <option key={item} value={item}>
+              {formatCategoryLabel(item)}
+            </option>
+          ))}
+        </SelectField>
         <FormField
           label="Price"
+          name="price"
           type="number"
           required
           min="0"
@@ -105,6 +95,7 @@ export const VehicleForm = ({
         />
         <FormField
           label="Quantity"
+          name="quantity"
           type="number"
           required
           min="0"

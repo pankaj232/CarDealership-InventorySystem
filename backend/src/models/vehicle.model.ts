@@ -1,15 +1,6 @@
 import mongoose, { Schema } from 'mongoose';
-import { IVehicle, VehicleCategory } from '../interfaces/vehicle.interface';
-
-const VEHICLE_CATEGORIES: VehicleCategory[] = [
-  'sedan',
-  'suv',
-  'truck',
-  'coupe',
-  'convertible',
-  'hatchback',
-  'van',
-];
+import { VEHICLE_CATEGORIES } from '../constants/vehicle.constants';
+import { IVehicle } from '../interfaces/vehicle.interface';
 
 const vehicleSchema = new Schema<IVehicle>(
   {
@@ -27,7 +18,7 @@ const vehicleSchema = new Schema<IVehicle>(
       type: String,
       required: [true, 'Category is required'],
       enum: {
-        values: VEHICLE_CATEGORIES,
+        values: [...VEHICLE_CATEGORIES],
         message: `Category must be one of: ${VEHICLE_CATEGORIES.join(', ')}`,
       },
     },
@@ -46,6 +37,9 @@ const vehicleSchema = new Schema<IVehicle>(
     timestamps: true,
   }
 );
+
+vehicleSchema.index({ make: 1, model: 1 });
+vehicleSchema.index({ category: 1, price: 1 });
 
 const Vehicle = mongoose.model<IVehicle>('Vehicle', vehicleSchema);
 

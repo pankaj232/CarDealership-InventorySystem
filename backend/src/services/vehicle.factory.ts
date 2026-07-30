@@ -8,29 +8,28 @@ import { RestockService } from './restock.service';
 import { SearchVehiclesService } from './search-vehicles.service';
 import { UpdateVehicleService } from './update-vehicle.service';
 
+const createVehicleRepository = (): MongooseVehicleRepository =>
+  new MongooseVehicleRepository();
+
+const createVehicleValidator = (): VehicleValidator => new VehicleValidator();
+
 export const createAddVehicleService = (): AddVehicleService =>
-  new AddVehicleService(
-    new MongooseVehicleRepository(),
-    new VehicleValidator()
-  );
+  new AddVehicleService(createVehicleRepository(), createVehicleValidator());
 
 export const createListVehiclesService = (): ListVehiclesService =>
-  new ListVehiclesService(new MongooseVehicleRepository());
+  new ListVehiclesService(createVehicleRepository());
 
 export const createSearchVehiclesService = (): SearchVehiclesService =>
-  new SearchVehiclesService(new MongooseVehicleRepository());
+  new SearchVehiclesService(createVehicleRepository());
 
 export const createUpdateVehicleService = (): UpdateVehicleService =>
-  new UpdateVehicleService(
-    new MongooseVehicleRepository(),
-    new VehicleValidator()
-  );
+  new UpdateVehicleService(createVehicleRepository(), createVehicleValidator());
 
 export const createDeleteVehicleService = (): DeleteVehicleService =>
-  new DeleteVehicleService(new MongooseVehicleRepository());
+  new DeleteVehicleService(createVehicleRepository());
 
 export const createPurchaseService = (): PurchaseService =>
-  new PurchaseService(new MongooseVehicleRepository());
+  new PurchaseService(createVehicleRepository());
 
 export const createRestockService = (): RestockService =>
-  new RestockService(new MongooseVehicleRepository());
+  new RestockService(createVehicleRepository());

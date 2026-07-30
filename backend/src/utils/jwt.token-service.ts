@@ -4,6 +4,9 @@ import {
   TokenPayload,
 } from '../interfaces/token-service.interface';
 import { UnauthorizedError } from './errors';
+import { UserRole } from '../interfaces/user.interface';
+
+const VALID_ROLES: UserRole[] = ['user', 'admin'];
 
 export class JwtTokenService implements ITokenService {
   constructor(
@@ -14,14 +17,22 @@ export class JwtTokenService implements ITokenService {
   sign(payload: TokenPayload): string {
     return jwt.sign(payload, this.secret, {
       expiresIn: this.expiresIn as jwt.SignOptions['expiresIn'],
+      algorithm: 'HS256',
     });
   }
 
   verify(token: string): TokenPayload {
     try {
-      const decoded = jwt.verify(token, this.secret);
+      const decoded = jwt.verify(token, this.secret, {
+        algorithms: ['HS256'],
+      });
 
-      if (typeof decoded === 'string' || !decoded.id || !decoded.email) {
+      if (
+        typeof decoded === 'string' ||
+        !decoded.id ||
+        !decoded.email ||
+        !VALID_ROLES.includes(decoded.role as UserRole)
+      ) {
         throw new UnauthorizedError('Invalid or expired token');
       }
 
